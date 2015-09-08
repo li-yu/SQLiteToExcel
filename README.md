@@ -6,13 +6,13 @@ SQLiteToExcel库整合了POI和一些基本的数据库查询操作，使得生�
 * 2.导出所有表
 
 ##如何使用
-###1.添加SD卡读写权限到AndroidManifest.xml
+####1.添加SD卡读写权限到AndroidManifest.xml
 ```xml
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 ```
-###2.下载Jar文件作为libs添加到工程中
+####2.下载Jar文件作为libs添加到工程中
 [SqliteToExcel-v1.0.0.jar](https://github.com/li-yu/SQLiteToExcel/blob/master/SqliteToExcel-v1.0.0.jar?raw=true)
-###3.示例代码
+####3.示例代码
 * 导出单个表到excel
 ```java
 SqliteToExcel ste = new SqliteToExcel(this, "helloworld.db");
@@ -54,7 +54,7 @@ ste.startExportAllTables("b.xls", new ExportListener() {
 	}
 });
 ```
-###4.注意事项
+####4.注意事项
 * 数据库文件须位于```/data/data/com.xxx.xxx/databases/```下。下一个版本会修改代码，可以指定数据库路径
 * excel文件生成路径为：```Environment.getExternalStorageDirectory()```，即外部SD卡根目录。下一个版本会修改代码，可以指定生成的路径
 
