@@ -1,5 +1,6 @@
 # SQLiteToExcel
-SQLiteToExcel库整合了POI和一些基本的数据库查询操作，使得生成excel文件更加便捷。
+SQLiteToExcel库整合了[Apache POI](http://poi.apache.org/)和一些基本的数据库查询操作，使得生成excel文件更加便捷。
+Apache POI版本：v3.12-20150511
 
 ##主要功能
 * 1.导出单个表
