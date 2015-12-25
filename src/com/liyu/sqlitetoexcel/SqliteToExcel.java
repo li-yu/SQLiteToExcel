@@ -27,6 +27,7 @@ public class SqliteToExcel{
 	private SQLiteDatabase database;
 	private String mDbName;
 	private ExportListener mListener;
+	private String mExportPath;
 	
 	private final static int MESSAGE_START = 0;
 	private final static int MESSAGE_COMPLETE = 1;
@@ -40,7 +41,30 @@ public class SqliteToExcel{
 	public SqliteToExcel(Context context,String dbName){
 		mContext = context;
 		mDbName = dbName;
-		database = SQLiteDatabase.openOrCreateDatabase(mContext.getDatabasePath(mDbName).getAbsolutePath(), null);
+		mExportPath = Environment.getExternalStorageDirectory().toString()+File.separator;
+		try {
+			database = SQLiteDatabase.openOrCreateDatabase(mContext.getDatabasePath(mDbName).getAbsolutePath(), null);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	/**
+	 * 
+	 * @param context 上下文
+	 * @param dbName 数据库名称
+	 * @param exportPath 导出文件的路径（不包括文件名）
+	 */
+	public SqliteToExcel(Context context,String dbName,String exportPath){
+		mContext = context;
+		mDbName = dbName;
+		mExportPath = exportPath;
+		try {
+			database = SQLiteDatabase.openOrCreateDatabase(mContext.getDatabasePath(mDbName).getAbsolutePath(), null);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -84,8 +108,7 @@ public class SqliteToExcel{
 		createSheet(table, sheet);
 		FileOutputStream fos = null;
 		try {
-			String sdPath = Environment.getExternalStorageDirectory().toString();
-			File file = new File(sdPath, fileName);
+			File file = new File(mExportPath, fileName);
 			fos = new FileOutputStream(file);
 			workbook.write(fos);
 		} catch (Exception e) {
@@ -129,8 +152,7 @@ public class SqliteToExcel{
 		}
 		FileOutputStream fos = null;
 		try {
-			String sdPath = Environment.getExternalStorageDirectory().toString();
-			File file = new File(sdPath, fileName);
+			File file = new File(mExportPath, fileName);
 			fos = new FileOutputStream(file);
 			workbook.write(fos);
 		} catch (Exception e) {
