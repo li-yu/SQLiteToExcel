@@ -68,7 +68,7 @@ ste.startExportAllTables("b.xls", new ExportListener() {
 });
 ```
 ####4.注意事项
-* 数据库文件须位于```/data/data/com.xxx.xxx/databases/```下。一般都是位于这个目录下，嗯。
+* 数据库文件须位于```/data/data/包名/databases/```下。一般都是位于这个目录下，嗯。
 * ~~excel文件生成路径为：```Environment.getExternalStorageDirectory()```，即外部SD卡根目录。下一个版本会修改代码，可以指定生成的路径~~
 
 ##关于我
