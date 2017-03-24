@@ -25,7 +25,7 @@ SQLiteToExcel 库整合了 [Apache POI](http://poi.apache.org/) 和一些基本�
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 ```
 #### 2.下载 Jar 文件作为 libs 添加到工程中
-[SqliteToExcel-v1.0.2.jar](SqliteToExcel-v1.0.2.jar)
+[SqliteToExcel-v1.0.2.jar](https://github.com/li-yu/SQLiteToExcel/raw/master/SqliteToExcel-v1.0.2.jar)
 #### 3.示例代码
 * 初始化（默认导出路径为外部 SD 卡根目录）
 ```java
