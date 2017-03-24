@@ -15,9 +15,9 @@ SQLiteToExcel 库整合了 [Apache POI](http://poi.apache.org/) 和一些基本�
 - Apache POI 版本同步更新到 v3.13
 
 ## 主要功能
-* 1.导出单个表
-* 2.导出多个表
-* 3.导出所有表
+* 导出单个表
+* 导出多个表
+* 导出所有表
 
 ## 如何使用
 #### 1.添加 SD 卡读写权限到 AndroidManifest.xml（Android 6.0 需要处理运行时权限）
@@ -59,7 +59,7 @@ public interface ExportListener {
 ```
 #### 4.注意事项
 * 目前仅支持 blob 字段导出为图片，因为我也不知道 byte[] 是文件还是图片。
-* 数据库文件须位于```/data/data/包名/databases/```下,一般都是位于这个目录下。
+* 数据库文件须位于```/data/data/包名/databases/```下，一般都是位于这个目录下。
 
 ## 关于我
 * Email: [me@liyuyu.cn](mailto:me@liyuyu.cn)
