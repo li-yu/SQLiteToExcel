@@ -21,8 +21,6 @@ import android.os.Handler;
 import android.os.Looper;
 
 /**
- * 导出SQLite数据库，生成excel文件
- * <p>
  * Created by liyu on 2015-9-8
  */
 public class SqliteToExcel {
@@ -36,21 +34,10 @@ public class SqliteToExcel {
     private String mExportPath;
     private HSSFWorkbook workbook;
 
-    /**
-     * 构造函数
-     *
-     * @param context 上下文
-     * @param dbName  数据库名称
-     */
     public SqliteToExcel(Context context, String dbName) {
         this(context, dbName, Environment.getExternalStorageDirectory().toString() + File.separator);
     }
 
-    /**
-     * @param context    上下文
-     * @param dbName     数据库名称
-     * @param exportPath 导出文件的路径（不包括文件名）
-     */
     public SqliteToExcel(Context context, String dbName, String exportPath) {
         mContext = context;
         mDbName = dbName;
@@ -62,11 +49,6 @@ public class SqliteToExcel {
         }
     }
 
-    /**
-     * 获取数据库中所有表名
-     *
-     * @return
-     */
     private ArrayList<String> getAllTables() {
         ArrayList<String> tables = new ArrayList<>();
         Cursor cursor = database.rawQuery("select name from sqlite_master where type='table' order by name", null);
@@ -77,12 +59,6 @@ public class SqliteToExcel {
         return tables;
     }
 
-    /**
-     * 获取一个表的所有列名
-     *
-     * @param table
-     * @return
-     */
     private ArrayList<String> getColumns(String table) {
         ArrayList<String> columns = new ArrayList<>();
         Cursor cursor = database.rawQuery("PRAGMA table_info(" + table + ")", null);
@@ -93,13 +69,6 @@ public class SqliteToExcel {
         return columns;
     }
 
-    /**
-     * 导出数据库中多个表到excel文件
-     *
-     * @param fileName 生成的excel文件名
-     * @param tables   表名
-     * @throws Exception
-     */
     private void exportTables(List<String> tables, final String fileName) throws Exception {
         workbook = new HSSFWorkbook();
         for (int i = 0; i < tables.size(); i++) {
@@ -125,37 +94,17 @@ public class SqliteToExcel {
         }
     }
 
-    /**
-     * 开始导出单个表的任务
-     *
-     * @param table    表名
-     * @param fileName 生成的excel文件名
-     * @param listener 任务监听器
-     */
     public void startExportSingleTable(final String table, final String fileName, ExportListener listener) {
         List<String> tables = new ArrayList<>();
         tables.add(table);
         startExportTables(tables, fileName, listener);
     }
 
-    /**
-     * 开始导出所有表的的任务
-     *
-     * @param fileName 生成的excel文件名
-     * @param listener 任务监听器
-     */
     public void startExportAllTables(final String fileName, ExportListener listener) {
         ArrayList<String> tables = getAllTables();
         startExportTables(tables, fileName, listener);
     }
 
-    /**
-     * 开始导出多个表的任务
-     *
-     * @param tables   表名
-     * @param fileName 生成的excel文件名
-     * @param listener 任务监听器
-     */
     public void startExportTables(final List<String> tables, final String fileName, ExportListener listener) {
         mListener = listener;
         mListener.onStart();
@@ -181,12 +130,6 @@ public class SqliteToExcel {
         }).start();
     }
 
-    /**
-     * 创建excel的sheet
-     *
-     * @param table 数据库表名
-     * @param sheet 工作薄中的sheet
-     */
     private void createSheet(String table, HSSFSheet sheet) {
         HSSFRow rowA = sheet.createRow(0);
         ArrayList<String> columns = getColumns(table);
@@ -197,13 +140,6 @@ public class SqliteToExcel {
         insertItemToSheet(table, sheet, columns);
     }
 
-    /**
-     * 插入数据到工作薄中的sheet
-     *
-     * @param table   数据库表名
-     * @param sheet   工作薄中的sheet
-     * @param columns 所有列
-     */
     private void insertItemToSheet(String table, HSSFSheet sheet, ArrayList<String> columns) {
         HSSFPatriarch patriarch = sheet.createDrawingPatriarch();
         Cursor cursor = database.rawQuery("select * from " + table, null);
@@ -216,9 +152,7 @@ public class SqliteToExcel {
                 if (cursor.getType(j) == Cursor.FIELD_TYPE_BLOB) {
                     HSSFClientAnchor anchor = new HSSFClientAnchor(0, 0, 0, 0, (short) j, n, (short) (j + 1), n + 1);
                     anchor.setAnchorType(3);
-                    //插入图片
                     patriarch.createPicture(anchor, workbook.addPicture(cursor.getBlob(j), HSSFWorkbook.PICTURE_TYPE_JPEG));
-
                 } else {
                     cellA.setCellValue(new HSSFRichTextString(cursor.getString(j)));
                 }
@@ -229,11 +163,6 @@ public class SqliteToExcel {
         cursor.close();
     }
 
-    /**
-     * 任务监听器接口
-     *
-     * @author yu.li
-     */
     public interface ExportListener {
         void onStart();
 

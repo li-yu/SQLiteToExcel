@@ -2,15 +2,15 @@
 SQLiteToExcel 库整合了 [Apache POI](http://poi.apache.org/) 和一些基本的数据库查询操作，使得生成 excel 文件更加便捷。
 
 ## 更新历史
-2017-03-24 ： v1.0.2 
+2017-03-28 ： v1.0.2 
+- 上传到 JCenter
 
+2017-03-24 ： v1.0.2 
 - 解决 blob 字段导出报错的 bug
 - 目前仅支持 blob 字段导出为图片
 - Apache POI 版本同步更新到 v3.15
 
-
 2015-12-25 ： v1.0.1 
-
 - 可以设置导出目录，默认为内部SD卡根目录
 - Apache POI 版本同步更新到 v3.13
 
@@ -20,12 +20,15 @@ SQLiteToExcel 库整合了 [Apache POI](http://poi.apache.org/) 和一些基本�
 * 导出所有表
 
 ## 如何使用
-#### 1.添加 SD 卡读写权限到 AndroidManifest.xml（Android 6.0 需要处理运行时权限）
+#### 1.添加 Gradle 依赖或者下载 Jar 文件作为 libs 添加到工程中
+``` Gradle
+compile 'com.liyu.tools:sqlitetoexcel:1.0.2'
+```
+[SqliteToExcel-v1.0.2.jar](https://github.com/li-yu/SQLiteToExcel/raw/master/SqliteToExcel-v1.0.2.jar)
+#### 2.添加 SD 卡读写权限到 AndroidManifest.xml（Android 6.0 需要处理运行时权限）
 ```xml
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 ```
-#### 2.下载 Jar 文件作为 libs 添加到工程中
-[SqliteToExcel-v1.0.2.jar](https://github.com/li-yu/SQLiteToExcel/raw/master/SqliteToExcel-v1.0.2.jar)
 #### 3.示例代码（具体示例可参考 [demo](https://github.com/li-yu/SQLiteToExcel/blob/master/app/src/main/java/com/liyu/demo/MainActivity.java) 工程）
 * 初始化（默认导出路径为外部 SD 卡根目录 ```Environment.getExternalStorageDirectory()```）
 ```java
