@@ -1,4 +1,6 @@
 # SQLiteToExcel
+[English README](README-EN.md)
+
 SQLiteToExcel 库整合了 [Apache POI](http://poi.apache.org/) 和一些基本的数据库查询操作，使得 SQLite 和 Excel 之间相互转换更加便捷。
 
 ## 更新历史
@@ -64,7 +66,7 @@ public interface ExportListener {
 ```
 
 #### 4.Excel -> SQLite 示例代码（具体示例可参考 [demo](https://github.com/li-yu/SQLiteToExcel/blob/master/app/src/main/java/com/liyu/demo/MainActivity.java) 工程）
-* 初始化）
+* 初始化
 ```java
 ExcelToSqlite ets = new ExcelToSqlite(this, "user.db");
 ```
