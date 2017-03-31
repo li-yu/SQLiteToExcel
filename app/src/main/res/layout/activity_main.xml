@@ -23,6 +23,16 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:onClick="onClick"
-        android:text="Start"/>
+        android:onClick="onExport"
+        android:text="Start export"/>
+
+    <Button
+        android:text="Start import"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/button"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:onClick="onImport"
+        android:id="@+id/button2"/>
 </RelativeLayout>

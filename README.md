@@ -1,7 +1,10 @@
 # SQLiteToExcel
-SQLiteToExcel 库整合了 [Apache POI](http://poi.apache.org/) 和一些基本的数据库查询操作，使得生成 excel 文件更加便捷。
+SQLiteToExcel 库整合了 [Apache POI](http://poi.apache.org/) 和一些基本的数据库查询操作，使得 SQLite 和 Excel 之间相互转换更加便捷。
 
 ## 更新历史
+2017-03-31 ： v1.0.3 
+- 新增 Excel 导入 SQLite 数据库的功能
+
 2017-03-28 ： v1.0.2 
 - 上传到 JCenter
 
@@ -15,21 +18,20 @@ SQLiteToExcel 库整合了 [Apache POI](http://poi.apache.org/) 和一些基本�
 - Apache POI 版本同步更新到 v3.13
 
 ## 主要功能
-* 导出单个表
-* 导出多个表
-* 导出所有表
+* SQLite <-> Excel 相互转换
 
 ## 如何使用
 #### 1.添加 Gradle 依赖或者下载 Jar 文件作为 libs 添加到工程中
 ``` Gradle
-compile 'com.liyu.tools:sqlitetoexcel:1.0.2'
+compile 'com.liyu.tools:sqlitetoexcel:1.0.3'
 ```
-[SqliteToExcel-v1.0.2.jar](https://github.com/li-yu/SQLiteToExcel/raw/master/SqliteToExcel-v1.0.2.jar)
-#### 2.添加 SD 卡读写权限到 AndroidManifest.xml（Android 6.0 需要处理运行时权限）
+[SqliteToExcel-v1.0.3.jar](https://github.com/li-yu/SQLiteToExcel/releases)
+#### 2.添加 SD 卡读写权限到 AndroidManifest.xml（Android 6.0 及以上需要处理运行时权限）
 ```xml
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 ```
-#### 3.示例代码（具体示例可参考 [demo](https://github.com/li-yu/SQLiteToExcel/blob/master/app/src/main/java/com/liyu/demo/MainActivity.java) 工程）
+
+#### 3.SQLite -> Excel 示例代码（具体示例可参考 [demo](https://github.com/li-yu/SQLiteToExcel/blob/master/app/src/main/java/com/liyu/demo/MainActivity.java) 工程）
 * 初始化（默认导出路径为外部 SD 卡根目录 ```Environment.getExternalStorageDirectory()```）
 ```java
 SqliteToExcel ste = new SqliteToExcel(this, "helloworld.db");
@@ -60,7 +62,33 @@ public interface ExportListener {
         void onError(Exception e);
     }
 ```
-#### 4.注意事项
+
+#### 4.Excel -> SQLite 示例代码（具体示例可参考 [demo](https://github.com/li-yu/SQLiteToExcel/blob/master/app/src/main/java/com/liyu/demo/MainActivity.java) 工程）
+* 初始化）
+```java
+ExcelToSqlite ets = new ExcelToSqlite(this, "user.db");
+```
+* 从 assets 目录传入 excel 文件
+```java
+ets.startFromAsset(String assetFileName, ImportListener listener);
+```
+* 以 File 形式传入任意 excel 文件
+```java
+ets.startFromFile(File file, ImportListener listener);
+```
+* 任务监听器接口
+```java
+public interface ImportListener {
+        void onStart();
+
+        void onCompleted(String dbName);
+
+        void onError(Exception e);
+    }
+```
+
+#### 5.注意事项
+* Excel 导入 SQLite 时，默认取 excel 中 sheet 的**第一行**作为数据库表的列名，样式请参考 [demo](https://github.com/li-yu/SQLiteToExcel/blob/master/app/src/main/assets/user.xls)。
 * 目前仅支持 blob 字段导出为图片，因为我也不知道 byte[] 是文件还是图片。
 * 数据库文件须位于```/data/data/包名/databases/```下，一般都是位于这个目录下。
 

@@ -30,7 +30,6 @@ public class SqliteToExcel {
     private Context mContext;
     private SQLiteDatabase database;
     private String mDbName;
-    private ExportListener mListener;
     private String mExportPath;
     private HSSFWorkbook workbook;
 
@@ -84,14 +83,6 @@ public class SqliteToExcel {
         }
         workbook.close();
         database.close();
-        if (mListener != null) {
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mListener.onCompleted(mExportPath + fileName);
-                }
-            });
-        }
     }
 
     public void startExportSingleTable(final String table, final String fileName, ExportListener listener) {
@@ -105,24 +96,33 @@ public class SqliteToExcel {
         startExportTables(tables, fileName, listener);
     }
 
-    public void startExportTables(final List<String> tables, final String fileName, ExportListener listener) {
-        mListener = listener;
-        mListener.onStart();
+    public void startExportTables(final List<String> tables, final String fileName, final ExportListener listener) {
+        if (listener != null) {
+            listener.onStart();
+        }
         new Thread(new Runnable() {
 
             @Override
             public void run() {
                 try {
                     exportTables(tables, fileName);
+                    if (listener != null) {
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                listener.onCompleted(mExportPath + fileName);
+                            }
+                        });
+                    }
                 } catch (final Exception e) {
                     if (database != null && database.isOpen()) {
                         database.close();
                     }
-                    if (mListener != null)
+                    if (listener != null)
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
-                                mListener.onError(e);
+                                listener.onError(e);
                             }
                         });
                 }
