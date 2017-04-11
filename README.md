@@ -1,4 +1,7 @@
 # SQLiteToExcel
+
+[ ![Download](https://api.bintray.com/packages/li-yu/maven/SQLiteToExcel/images/download.svg) ](https://bintray.com/li-yu/maven/SQLiteToExcel/_latestVersion)
+
 [English README](README-EN.md)
 
 SQLiteToExcel 库整合了 [Apache POI](http://poi.apache.org/) 和一些基本的数据库查询操作，使得 SQLite 和 Excel 之间相互转换更加便捷。
