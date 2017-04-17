@@ -94,7 +94,12 @@ public interface ImportListener {
     }
 ```
 
-#### 5.Precautions
+#### 5.Thanks
+- [https://github.com/centic9/poi-on-android](https://github.com/centic9/poi-on-android)
+- [https://github.com/FasterXML/aalto-xml](https://github.com/FasterXML/aalto-xml)
+- [https://github.com/johnrengelman/shadow](https://github.com/johnrengelman/shadow)
+
+#### 6.Precautions
 * When convert Excel to SQLite,the default take excel sheet in the first row as the database table column name, please refer to the style [demo](https://github.com/li-yu/SQLiteToExcel/blob/master/app/src/main/assets/user.xls).
 * Currently only blob field is supported as a picture, because I do not know whether byte [] is a file or a picture.
 * The database files must be located under ```/data/data/package name/databases/` ``, and are usually located in this directory.
