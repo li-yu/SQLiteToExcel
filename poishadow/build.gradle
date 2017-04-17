@@ -1,0 +1,41 @@
+apply plugin: 'java'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'org.apache.poi:poi:3.15'
+    compile 'org.apache.poi:poi-ooxml:3.15'
+    compile 'com.fasterxml:aalto-xml:1.0.0'
+}
+
+shadowJar {
+    // Filtering shadow jar contents by file pattern.
+    exclude 'schemaorg_apache_xmlbeans/attribute/**'
+    exclude 'schemaorg_apache_xmlbeans/attributegroup/**'
+    exclude 'schemaorg_apache_xmlbeans/element/**'
+    exclude 'schemaorg_apache_xmlbeans/identityconstraint/**'
+    exclude 'schemaorg_apache_xmlbeans/javaname/**'
+    exclude 'schemaorg_apache_xmlbeans/modelgroup/**'
+    exclude 'schemaorg_apache_xmlbeans/namespace/**'
+    exclude 'schemaorg_apache_xmlbeans/src/**'
+    exclude 'schemaorg_apache_xmlbeans/system/sXML*/**'
+    exclude 'schemaorg_apache_xmlbeans/system/s8C3F193EE11A2F798ACF65489B9E6078/**'
+    exclude 'schemaorg_apache_xmlbeans/type/**'
+
+    exclude 'repackage/**'
+
+    exclude 'LICENSE.txt'
+    exclude 'NOTICE.txt'
+    exclude 'META-INF/LICENSE'
+    exclude 'META-INF/LICENSE.txt'
+    exclude 'META-INF/NOTICE'
+    exclude 'META-INF/NOTICE.txt'
+    exclude 'META-INF/maven/**'
+
+    // Relocate javax dependencies so Android does not choke
+    relocate 'javax.xml.namespace', 'org.apache.poi.javax.xml.namespace'
+    relocate 'javax.xml.stream', 'org.apache.poi.javax.xml.stream'
+    relocate 'javax.xml.XMLConstants', 'org.apache.poi.javax.xml.XMLConstants'
+}
+
+assemble.dependsOn shadowJar

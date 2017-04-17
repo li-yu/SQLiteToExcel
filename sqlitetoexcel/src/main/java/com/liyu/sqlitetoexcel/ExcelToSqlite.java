@@ -10,6 +10,8 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,6 +33,11 @@ public class ExcelToSqlite {
     private String mDbName;
 
     public ExcelToSqlite(Context context, String dbName) {
+
+        System.setProperty("org.apache.poi.javax.xml.stream.XMLInputFactory", "com.fasterxml.aalto.stax.InputFactoryImpl");
+        System.setProperty("org.apache.poi.javax.xml.stream.XMLOutputFactory", "com.fasterxml.aalto.stax.OutputFactoryImpl");
+        System.setProperty("org.apache.poi.javax.xml.stream.XMLEventFactory", "com.fasterxml.aalto.stax.EventFactoryImpl");
+
         mContext = context;
         mDbName = dbName;
         try {
@@ -48,7 +55,7 @@ public class ExcelToSqlite {
             @Override
             public void run() {
                 try {
-                    working(mContext.getAssets().open(assetFileName));
+                    working(mContext.getAssets().open(assetFileName), assetFileName);
                     if (listener != null) {
                         handler.post(new Runnable() {
                             @Override
@@ -86,7 +93,7 @@ public class ExcelToSqlite {
             @Override
             public void run() {
                 try {
-                    working(new FileInputStream(file));
+                    working(new FileInputStream(file), file.getName());
                     if (listener != null) {
                         handler.post(new Runnable() {
                             @Override
@@ -113,8 +120,15 @@ public class ExcelToSqlite {
 
     }
 
-    private void working(InputStream stream) throws Exception {
-        HSSFWorkbook workbook = new HSSFWorkbook(stream);
+    private void working(InputStream stream, String fileName) throws Exception {
+        Workbook workbook;
+        if (fileName.endsWith(".xls")) {
+            workbook = new HSSFWorkbook(stream);
+        } else if (fileName.endsWith(".xlsx")) {
+            workbook = new XSSFWorkbook(stream);
+        } else {
+            throw new UnsupportedOperationException("file name is null or unsupported file format!");
+        }
         int sheetNumber = workbook.getNumberOfSheets();
         for (int i = 0; i < sheetNumber; i++) {
             createTable(workbook.getSheetAt(i));
@@ -144,12 +158,17 @@ public class ExcelToSqlite {
             Row row = rit.next();
             ContentValues values = new ContentValues();
             for (int n = 0; n < row.getPhysicalNumberOfCells(); n++) {
+                if (row.getCell(n) == null) {
+                    continue;
+                }
                 if (row.getCell(n).getCellType() == Cell.CELL_TYPE_NUMERIC) {
                     values.put(columns.get(n), row.getCell(n).getNumericCellValue());
                 } else {
                     values.put(columns.get(n), row.getCell(n).getStringCellValue());
                 }
             }
+            if (values.size() == 0)
+                continue;
             long result = database.insert(sheet.getSheetName(), null, values);
             if (result < 0) {
                 throw new RuntimeException("insert value failed!");

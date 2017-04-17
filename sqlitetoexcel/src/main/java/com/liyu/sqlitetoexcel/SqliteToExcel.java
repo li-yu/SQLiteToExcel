@@ -12,6 +12,16 @@ import org.apache.poi.hssf.usermodel.HSSFRichTextString;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.ClientAnchor;
+import org.apache.poi.ss.usermodel.Drawing;
+import org.apache.poi.ss.usermodel.RichTextString;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -19,6 +29,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 
 /**
  * Created by liyu on 2015-9-8
@@ -31,13 +42,18 @@ public class SqliteToExcel {
     private SQLiteDatabase database;
     private String mDbName;
     private String mExportPath;
-    private HSSFWorkbook workbook;
+    private Workbook workbook;
 
     public SqliteToExcel(Context context, String dbName) {
         this(context, dbName, Environment.getExternalStorageDirectory().toString() + File.separator);
     }
 
     public SqliteToExcel(Context context, String dbName, String exportPath) {
+
+        System.setProperty("org.apache.poi.javax.xml.stream.XMLInputFactory", "com.fasterxml.aalto.stax.InputFactoryImpl");
+        System.setProperty("org.apache.poi.javax.xml.stream.XMLOutputFactory", "com.fasterxml.aalto.stax.OutputFactoryImpl");
+        System.setProperty("org.apache.poi.javax.xml.stream.XMLEventFactory", "com.fasterxml.aalto.stax.EventFactoryImpl");
+
         mContext = context;
         mDbName = dbName;
         mExportPath = exportPath;
@@ -69,9 +85,15 @@ public class SqliteToExcel {
     }
 
     private void exportTables(List<String> tables, final String fileName) throws Exception {
-        workbook = new HSSFWorkbook();
+        if (fileName.endsWith(".xls")) {
+            workbook = new HSSFWorkbook();
+        } else if (fileName.endsWith(".xlsx")) {
+            workbook = new XSSFWorkbook();
+        } else {
+            throw new RuntimeException("file name is null or unsupported file format!");
+        }
         for (int i = 0; i < tables.size(); i++) {
-            HSSFSheet sheet = workbook.createSheet(tables.get(i));
+            Sheet sheet = workbook.createSheet(tables.get(i));
             createSheet(tables.get(i), sheet);
         }
         File file = new File(mExportPath, fileName);
@@ -130,31 +152,44 @@ public class SqliteToExcel {
         }).start();
     }
 
-    private void createSheet(String table, HSSFSheet sheet) {
-        HSSFRow rowA = sheet.createRow(0);
+    private void createSheet(String table, Sheet sheet) {
+        Row rowA = sheet.createRow(0);
         ArrayList<String> columns = getColumns(table);
         for (int i = 0; i < columns.size(); i++) {
-            HSSFCell cellA = rowA.createCell(i);
-            cellA.setCellValue(new HSSFRichTextString("" + columns.get(i)));
+            Cell cellA = rowA.createCell(i);
+            if (workbook instanceof HSSFWorkbook) {
+                cellA.setCellValue(new HSSFRichTextString("" + columns.get(i)));
+            } else if (workbook instanceof XSSFWorkbook) {
+                cellA.setCellValue(new XSSFRichTextString("" + columns.get(i)));
+            }
         }
         insertItemToSheet(table, sheet, columns);
     }
 
-    private void insertItemToSheet(String table, HSSFSheet sheet, ArrayList<String> columns) {
-        HSSFPatriarch patriarch = sheet.createDrawingPatriarch();
+    private void insertItemToSheet(String table, Sheet sheet, ArrayList<String> columns) {
+        Drawing patriarch = sheet.createDrawingPatriarch();
         Cursor cursor = database.rawQuery("select * from " + table, null);
         cursor.moveToFirst();
         int n = 1;
         while (!cursor.isAfterLast()) {
-            HSSFRow rowA = sheet.createRow(n);
+            Row rowA = sheet.createRow(n);
             for (int j = 0; j < columns.size(); j++) {
-                HSSFCell cellA = rowA.createCell(j);
+                Cell cellA = rowA.createCell(j);
                 if (cursor.getType(j) == Cursor.FIELD_TYPE_BLOB) {
-                    HSSFClientAnchor anchor = new HSSFClientAnchor(0, 0, 0, 0, (short) j, n, (short) (j + 1), n + 1);
+                    ClientAnchor anchor = null;
+                    if (workbook instanceof HSSFWorkbook) {
+                        anchor = new HSSFClientAnchor(0, 0, 0, 0, (short) j, n, (short) (j + 1), n + 1);
+                    } else if (workbook instanceof XSSFWorkbook) {
+                        anchor = new XSSFClientAnchor(0, 0, 0, 0, (short) j, n, (short) (j + 1), n + 1);
+                    }
                     anchor.setAnchorType(3);
                     patriarch.createPicture(anchor, workbook.addPicture(cursor.getBlob(j), HSSFWorkbook.PICTURE_TYPE_JPEG));
                 } else {
-                    cellA.setCellValue(new HSSFRichTextString(cursor.getString(j)));
+                    if (workbook instanceof HSSFWorkbook) {
+                        cellA.setCellValue(new HSSFRichTextString(cursor.getString(j)));
+                    } else if (workbook instanceof XSSFWorkbook) {
+                        cellA.setCellValue(new XSSFRichTextString(cursor.getString(j)));
+                    }
                 }
             }
             n++;

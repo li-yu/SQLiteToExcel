@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void onExport(View v) {
         SqliteToExcel ste = new SqliteToExcel(this, "ste_db.db");
-        ste.startExportAllTables("test.xls", new SqliteToExcel.ExportListener() {
+        ste.startExportAllTables("test001.xls", new SqliteToExcel.ExportListener() {
             @Override
             public void onStart() {
                 tv.append(makeLog("\n" +
@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void onImport(View v) {
         ExcelToSqlite ets = new ExcelToSqlite(this, "user.db");
-        ets.startFromAsset("user.xls", new ExcelToSqlite.ImportListener() {
+        ets.startFromAsset("user2.xlsx", new ExcelToSqlite.ImportListener() {
             @Override
             public void onStart() {
                 tv.append(makeLog("\n" +
