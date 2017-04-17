@@ -7,6 +7,11 @@
 The SQLiteToExcel library integrates [Apache POI](http://poi.apache.org/) and some basic database query operations, making it easier to convert between SQLite and Excel.
 
 ## Version history
+2017-04-17 ： v1.0.4 
+- Support xlsx，Thanks @DearZack feedback [issue](https://github.com/li-yu/SQLiteToExcel/issues/2)
+- In order to support xlsx, the number of methods has exploded, please open `` multiDexEnabled``, no special needs, it is recommended to use the v1.0.3 version
+- Fixed a bug that blank line might cause an error when importing excel
+
 2017-03-31 ： v1.0.3 
 - New feature: Convert Excel to SQLite
 
@@ -22,15 +27,12 @@ The SQLiteToExcel library integrates [Apache POI](http://poi.apache.org/) and so
 - Support custom export directory, the default is the external SD card root directory
 - Update Apache POI to v3.13
 
-## Main function
-* SQLite <-> Excel convert each other
-
 ## How to use
 #### 1.Add Gradle dependencies or download the Jar file as libs to the project
 ``` Gradle
-compile 'com.liyu.tools:sqlitetoexcel:1.0.3'
+compile 'com.liyu.tools:sqlitetoexcel:1.0.4'
 ```
-[SqliteToExcel-v1.0.3.jar](https://github.com/li-yu/SQLiteToExcel/releases)
+[SqliteToExcel-v1.0.4.jar](https://github.com/li-yu/SQLiteToExcel/releases)
 #### 2.Add SD card read and write permissions to AndroidManifest.xml (Android 6.0 and above need to deal with run-time permissions)
 ```xml
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />

@@ -7,6 +7,11 @@
 SQLiteToExcel 库整合了 [Apache POI](http://poi.apache.org/) 和一些基本的数据库查询操作，使得 SQLite 和 Excel 之间相互转换更加便捷。
 
 ## 更新历史
+2017-04-17 ： v1.0.4 
+- 支持 xlsx 格式输入和输出，感谢 @DearZack 反馈 [issue](https://github.com/li-yu/SQLiteToExcel/issues/2)
+- 为了支持 xlsx，方法数已经爆表，请开启 ``multiDexEnabled``，没有特殊需求，建议还是使用仅支持 xls 的 v1.0.3 版本
+- 修复了 excel 导入时空白行可能引起报错的 bug
+
 2017-03-31 ： v1.0.3 
 - 新增 Excel 导入 SQLite 数据库的功能
 
@@ -22,15 +27,12 @@ SQLiteToExcel 库整合了 [Apache POI](http://poi.apache.org/) 和一些基本�
 - 可以设置导出目录，默认为内部SD卡根目录
 - Apache POI 版本同步更新到 v3.13
 
-## 主要功能
-* SQLite <-> Excel 相互转换
-
 ## 如何使用
 #### 1.添加 Gradle 依赖或者下载 Jar 文件作为 libs 添加到工程中
 ``` Gradle
-compile 'com.liyu.tools:sqlitetoexcel:1.0.3'
+compile 'com.liyu.tools:sqlitetoexcel:1.0.4'
 ```
-[SqliteToExcel-v1.0.3.jar](https://github.com/li-yu/SQLiteToExcel/releases)
+[SqliteToExcel-v1.0.4.jar](https://github.com/li-yu/SQLiteToExcel/releases)
 #### 2.添加 SD 卡读写权限到 AndroidManifest.xml（Android 6.0 及以上需要处理运行时权限）
 ```xml
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
