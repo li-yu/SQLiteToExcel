@@ -7,25 +7,7 @@
 The SQLiteToExcel library integrates [Apache POI](http://poi.apache.org/) and some basic database query operations, making it easier to convert between SQLite and Excel.
 
 ## Version history
-2017-04-17 ： v1.0.4 
-- Support xlsx，Thanks @DearZack feedback [issue](https://github.com/li-yu/SQLiteToExcel/issues/2)
-- In order to support xlsx, the number of methods has exploded, please open `` multiDexEnabled``, no special needs, it is recommended to use the v1.0.3 version
-- Fixed a bug that blank line might cause an error when importing excel
-
-2017-03-31 ： v1.0.3 
-- New feature: Convert Excel to SQLite
-
-2017-03-28 ： v1.0.2 
-- Updload to JCenter
-
-2017-03-24 ： v1.0.2 
-- Resolve bugs in blob fields
-- Support blob fields to image
-- Update Apache POI to v3.15
-
-2015-12-25 ： v1.0.1 
-- Support custom export directory, the default is the external SD card root directory
-- Update Apache POI to v3.13
+[Release Notes](https://github.com/li-yu/SQLiteToExcel/releases)
 
 ## How to use
 #### 1.Add Gradle dependencies or download the Jar file as libs to the project
