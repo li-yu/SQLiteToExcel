@@ -46,10 +46,11 @@ new ExcelToSQLite
 - [https://github.com/johnrengelman/shadow](https://github.com/johnrengelman/shadow)
 
 #### 5.注意事项
+* 读写外部文件时，Android 6.0 及以上版本需处理运行时权限。
 * Excel 导入 SQLite 时，默认取 excel 中 sheet 的**第一行**作为数据库表的列名，样式请参考 [demo](https://github.com/li-yu/SQLiteToExcel/blob/master/app/src/main/assets/user.xls)。
 * 目前仅支持 blob 字段导出为图片，因为我也不知道 byte[] 是文件还是图片。
 * ~~数据库文件须位于```/data/data/包名/databases/```下，一般都是位于这个目录下。~~
 
-## 关于我
+## 联系我
 * Email: [me@liyuyu.cn](mailto:me@liyuyu.cn)
 * Weibo: [@呵呵小小鱼](http://weibo.com/u/1241167880)

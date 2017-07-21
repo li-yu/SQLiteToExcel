@@ -46,6 +46,7 @@ new ExcelToSQLite
 - [https://github.com/johnrengelman/shadow](https://github.com/johnrengelman/shadow)
 
 #### 5.Precautions
+* When read or write external file, Android 6.0 and above need to deal with run-time permissions.
 * When convert Excel to SQLite, take excel sheet first row as the database table column name, please refer to the style [demo](https://github.com/li-yu/SQLiteToExcel/blob/master/app/src/main/assets/user.xls).
 * Currently only blob field is supported as a picture, because I do not know whether byte [] is a file or a picture.
 * ~~The database files must be located under ```/data/data/package name/databases/` ``, and are usually located in this directory.~~
