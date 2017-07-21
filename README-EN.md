@@ -12,12 +12,12 @@ From v1.0.5, **not support xlsx** format any more, because poi ooxml lib and oth
 [Release Notes](https://github.com/li-yu/SQLiteToExcel/releases)
 
 ## How to use
-#### 1.Add Gradle dependencies
+#### 1. Add Gradle dependencies
 ``` Gradle
 compile 'com.liyu.tools:sqlitetoexcel:1.0.5'
 ```
 
-#### 2.SQLite -> Excel Sample code(Specific examples can be found in [demo](https://github.com/li-yu/SQLiteToExcel/blob/master/app/src/main/java/com/liyu/demo/MainActivity.java))
+#### 2. SQLite -> Excel Sample code(Specific examples can be found in [demo](https://github.com/li-yu/SQLiteToExcel/blob/master/app/src/main/java/com/liyu/demo/MainActivity.java))
 ```java
 new SQLiteToExcel
                 .Builder(this)
@@ -30,7 +30,7 @@ new SQLiteToExcel
                 .start(ExportListener); // or .start() for synchronous method.
 ```
 
-#### 3.Excel -> SQLite Sample code(Specific examples can be found in [demo](https://github.com/li-yu/SQLiteToExcel/blob/master/app/src/main/java/com/liyu/demo/MainActivity.java))
+#### 3. Excel -> SQLite Sample code(Specific examples can be found in [demo](https://github.com/li-yu/SQLiteToExcel/blob/master/app/src/main/java/com/liyu/demo/MainActivity.java))
 ```java
 new ExcelToSQLite
                 .Builder(this)
@@ -40,12 +40,12 @@ new ExcelToSQLite
                 .start(ImportListener); // or .start() for synchronous method.
 ```
 
-#### 4.Thanks (how to support xlsx?)
+#### 4. Thanks (how to support xlsx?)
 - [https://github.com/centic9/poi-on-android](https://github.com/centic9/poi-on-android)
 - [https://github.com/FasterXML/aalto-xml](https://github.com/FasterXML/aalto-xml)
 - [https://github.com/johnrengelman/shadow](https://github.com/johnrengelman/shadow)
 
-#### 5.Precautions
+#### 5. Precautions
 * When read or write external file, Android 6.0 and above need to deal with run-time permissions.
 * When convert Excel to SQLite, take excel sheet first row as the database table column name, please refer to the style [demo](https://github.com/li-yu/SQLiteToExcel/blob/master/app/src/main/assets/user.xls).
 * Currently only blob field is supported as a picture, because I do not know whether byte [] is a file or a picture.
