@@ -6,85 +6,49 @@
 
 The SQLiteToExcel library integrates [Apache POI](http://poi.apache.org/) and some basic database query operations, making it easier to convert between SQLite and Excel.
 
+From v1.0.5, **not support xlsx** format any more, because poi ooxml lib and other dependencies are so big( > 10 MB), and there are some strange problems on Android.
+
 ## Version history
 [Release Notes](https://github.com/li-yu/SQLiteToExcel/releases)
 
 ## How to use
-#### 1.Add Gradle dependencies or download the Jar file as libs to the project
+#### 1.Add Gradle dependencies
 ``` Gradle
-compile 'com.liyu.tools:sqlitetoexcel:1.0.4'
-```
-[SqliteToExcel-v1.0.4.jar](https://github.com/li-yu/SQLiteToExcel/releases)
-#### 2.Add SD card read and write permissions to AndroidManifest.xml (Android 6.0 and above need to deal with run-time permissions)
-```xml
-<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+compile 'com.liyu.tools:sqlitetoexcel:1.0.5'
 ```
 
-#### 3.SQLite -> Excel Sample code(Specific examples can be found in [demo](https://github.com/li-yu/SQLiteToExcel/blob/master/app/src/main/java/com/liyu/demo/MainActivity.java))
-* Initialize (Default export path is external SD card root directory ```Environment.getExternalStorageDirectory()```)
+#### 2.SQLite -> Excel Sample code(Specific examples can be found in [demo](https://github.com/li-yu/SQLiteToExcel/blob/master/app/src/main/java/com/liyu/demo/MainActivity.java))
 ```java
-SqliteToExcel ste = new SqliteToExcel(this, "helloworld.db");
-```
-or(Specifies the root directory of the export)
-```java
-SqliteToExcel ste = new SqliteToExcel(this, "helloworld.db", "/mnt/sdcard/myfiles/");
-```
-* Export a single table to excel
-```java
-ste.startExportSingleTable(String table, String fileName, ExportListener listener);
-```
-* Export multiple tables to excel
-```java
-ste.startExportTables(List<String> tables, String fileName, ExportListener listener);
-```
-* Export all tables to excel
-```java
-ste.startExportAllTables(String fileName, ExportListener listener);
-```
-* Task listener interface
-```java
-public interface ExportListener {
-        void onStart();
-
-        void onCompleted(String filePath);
-
-        void onError(Exception e);
-    }
+new SQLiteToExcel
+                .Builder(this)
+                .setDataBase(databasePath) //Required. Tips: internal database path can be got by context.getDatabasePath("internal.db").getPath()
+                .setTables(table1, table2) //Optional, if null, all tables will be export. 
+                .setPath(outoutPath) //Optional, if null, default output path is app ExternalFilesDir. 
+                .setFileName("test.xls") //Optional, if null, default output file name is xxx.db.xls
+                .setEncryptKey("1234567") //Optional, if you want to encrypt the output file.
+                .setProtectKey("9876543") //Optional, if you want to set the sheet read only.
+                .start(ExportListener); // or .start() for synchronous method.
 ```
 
-#### 4.Excel -> SQLite Sample code(Specific examples can be found in [demo](https://github.com/li-yu/SQLiteToExcel/blob/master/app/src/main/java/com/liyu/demo/MainActivity.java))
-* Initialize
+#### 3.Excel -> SQLite Sample code(Specific examples can be found in [demo](https://github.com/li-yu/SQLiteToExcel/blob/master/app/src/main/java/com/liyu/demo/MainActivity.java))
 ```java
-ExcelToSqlite ets = new ExcelToSqlite(this, "user.db");
-```
-* From the assets directory
-```java
-ets.startFromAsset(String assetFileName, ImportListener listener);
-```
-* For any excel files
-```java
-ets.startFromFile(File file, ImportListener listener);
-```
-* Task listener interface
-```java
-public interface ImportListener {
-        void onStart();
-
-        void onCompleted(String dbName);
-
-        void onError(Exception e);
-    }
+new ExcelToSQLite
+                .Builder(this)
+                .setDataBase(databasePath) //Required.
+                .setAssetFileName("user.xls") // if it is a asset file.
+                .setFilePath("/storage/doc/user.xls") // if it is a normal file.
+                .start(ImportListener); // or .start() for synchronous method.
 ```
 
-#### 5.Thanks
+#### 4.Thanks (how to support xlsx?)
 - [https://github.com/centic9/poi-on-android](https://github.com/centic9/poi-on-android)
 - [https://github.com/FasterXML/aalto-xml](https://github.com/FasterXML/aalto-xml)
 - [https://github.com/johnrengelman/shadow](https://github.com/johnrengelman/shadow)
 
-#### 6.Precautions
-* When convert Excel to SQLite,the default take excel sheet in the first row as the database table column name, please refer to the style [demo](https://github.com/li-yu/SQLiteToExcel/blob/master/app/src/main/assets/user.xls).
+#### 5.Precautions
+* When convert Excel to SQLite, take excel sheet first row as the database table column name, please refer to the style [demo](https://github.com/li-yu/SQLiteToExcel/blob/master/app/src/main/assets/user.xls).
 * Currently only blob field is supported as a picture, because I do not know whether byte [] is a file or a picture.
-* The database files must be located under ```/data/data/package name/databases/` ``, and are usually located in this directory.
+* ~~The database files must be located under ```/data/data/package name/databases/` ``, and are usually located in this directory.~~
 
 ## About me
 * Email: [me@liyuyu.cn](mailto:me@liyuyu.cn)

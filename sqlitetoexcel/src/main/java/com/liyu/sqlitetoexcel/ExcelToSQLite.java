@@ -5,15 +5,14 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -21,33 +20,107 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
+ * Excel to SQLite
  * Created by liyu on 2017/3/31.
  */
 
-public class ExcelToSqlite {
+public class ExcelToSQLite {
 
     private static Handler handler = new Handler(Looper.getMainLooper());
 
     private Context mContext;
     private SQLiteDatabase database;
-    private String mDbName;
+    private String filePath;
+    private String assetFileName;
 
-    public ExcelToSqlite(Context context, String dbName) {
+    public static class Builder {
+        private Context context;
+        private String dataBaseName;
+        private String filePath;
+        private String assetFileName;
 
-        System.setProperty("org.apache.poi.javax.xml.stream.XMLInputFactory", "com.fasterxml.aalto.stax.InputFactoryImpl");
-        System.setProperty("org.apache.poi.javax.xml.stream.XMLOutputFactory", "com.fasterxml.aalto.stax.OutputFactoryImpl");
-        System.setProperty("org.apache.poi.javax.xml.stream.XMLEventFactory", "com.fasterxml.aalto.stax.EventFactoryImpl");
+        public Builder(Context context) {
+            this.context = context.getApplicationContext();
+        }
 
-        mContext = context;
-        mDbName = dbName;
+        public ExcelToSQLite build() {
+            if (TextUtils.isEmpty(dataBaseName)) {
+                throw new IllegalArgumentException("Database name must not be null.");
+            }
+            return new ExcelToSQLite(context, dataBaseName, filePath, assetFileName);
+        }
+
+        public Builder setDataBase(String dataBaseName) {
+            this.dataBaseName = dataBaseName;
+            return this;
+        }
+
+        public Builder setFilePath(String path) {
+            this.filePath = path;
+            this.assetFileName = null;
+            return this;
+        }
+
+        public Builder setAssetFileName(String name) {
+            this.assetFileName = name;
+            this.filePath = null;
+            return this;
+        }
+
+        public void start() {
+            final ExcelToSQLite excelToSqlite = build();
+            excelToSqlite.start();
+        }
+
+        public void start(ImportListener listener) {
+            final ExcelToSQLite excelToSqlite = build();
+            excelToSqlite.start(listener);
+        }
+
+    }
+
+    private ExcelToSQLite(Context mContext, String dataBaseName, String filePath, String assetFileName) {
+        this.mContext = mContext;
+        this.filePath = filePath;
+        this.assetFileName = assetFileName;
+
         try {
-            database = SQLiteDatabase.openOrCreateDatabase(mContext.getDatabasePath(mDbName).getAbsolutePath(), null);
+            database = SQLiteDatabase.openOrCreateDatabase(dataBaseName, null);
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
-    public void startFromAsset(final String assetFileName, final ImportListener listener) {
+    /**
+     * start task
+     */
+    public boolean start() {
+        if (TextUtils.isEmpty(filePath) && TextUtils.isEmpty(assetFileName)) {
+            throw new IllegalArgumentException("Asset file or external file name must not be null.");
+        }
+        try {
+            if (TextUtils.isEmpty(filePath)) {
+                return importTables(mContext.getAssets().open(assetFileName), assetFileName);
+            } else {
+                return importTables(new FileInputStream(filePath), filePath);
+            }
+        } catch (Exception e) {
+            if (database != null && database.isOpen()) {
+                database.close();
+            }
+            return false;
+        }
+    }
+
+    /**
+     * start task with a listener
+     *
+     * @param listener
+     */
+    public void start(final ImportListener listener) {
+        if (TextUtils.isEmpty(filePath) && TextUtils.isEmpty(assetFileName)) {
+            throw new IllegalArgumentException("Asset file or external file name must not be null.");
+        }
         if (listener != null) {
             listener.onStart();
         }
@@ -55,12 +128,16 @@ public class ExcelToSqlite {
             @Override
             public void run() {
                 try {
-                    working(mContext.getAssets().open(assetFileName), assetFileName);
+                    if (TextUtils.isEmpty(filePath)) {
+                        importTables(mContext.getAssets().open(assetFileName), assetFileName);
+                    } else {
+                        importTables(new FileInputStream(filePath), filePath);
+                    }
                     if (listener != null) {
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
-                                listener.onCompleted(mDbName);
+                                listener.onCompleted(true);
                             }
                         });
                     }
@@ -81,61 +158,34 @@ public class ExcelToSqlite {
         }).start();
     }
 
-    public void startFromFile(String filePath, ImportListener listener) {
-        startFromFile(new File(filePath), listener);
-    }
-
-    public void startFromFile(final File file, final ImportListener listener) {
-        if (listener != null) {
-            listener.onStart();
-        }
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    working(new FileInputStream(file), file.getName());
-                    if (listener != null) {
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                listener.onCompleted(mDbName);
-                            }
-                        });
-                    }
-                } catch (final Exception e) {
-                    if (database != null && database.isOpen()) {
-                        database.close();
-                    }
-                    if (listener != null) {
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                listener.onError(e);
-                            }
-                        });
-                    }
-                }
-            }
-        }).start();
-
-    }
-
-    private void working(InputStream stream, String fileName) throws Exception {
+    /**
+     * core code
+     *
+     * @param stream   asset stream or file stream
+     * @param fileName origin file name
+     * @throws Exception
+     */
+    private boolean importTables(InputStream stream, String fileName) throws Exception {
         Workbook workbook;
-        if (fileName.endsWith(".xls")) {
+        if (fileName.toLowerCase().endsWith(".xls")) {
             workbook = new HSSFWorkbook(stream);
-        } else if (fileName.endsWith(".xlsx")) {
-            workbook = new XSSFWorkbook(stream);
         } else {
-            throw new UnsupportedOperationException("file name is null or unsupported file format!");
+            throw new UnsupportedOperationException("Unsupported file format!");
         }
+        stream.close();
         int sheetNumber = workbook.getNumberOfSheets();
         for (int i = 0; i < sheetNumber; i++) {
             createTable(workbook.getSheetAt(i));
         }
         database.close();
+        return true;
     }
 
+    /**
+     * create table by sheet
+     *
+     * @param sheet
+     */
     private void createTable(Sheet sheet) {
         StringBuilder createTableSql = new StringBuilder("CREATE TABLE IF NOT EXISTS ");
         createTableSql.append(sheet.getSheetName());
@@ -171,15 +221,18 @@ public class ExcelToSqlite {
                 continue;
             long result = database.insert(sheet.getSheetName(), null, values);
             if (result < 0) {
-                throw new RuntimeException("insert value failed!");
+                throw new RuntimeException("Insert value failed!");
             }
         }
     }
 
+    /**
+     * Callbacks for import events.
+     */
     public interface ImportListener {
         void onStart();
 
-        void onCompleted(String dbName);
+        void onCompleted(boolean result);
 
         void onError(Exception e);
     }

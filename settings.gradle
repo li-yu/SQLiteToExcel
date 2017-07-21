@@ -1,1 +1,1 @@
-include ':app', ':sqlitetoexcel', ':poishadow'
+include ':app', ':sqlitetoexcel'

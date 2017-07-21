@@ -5,16 +5,18 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Environment;
 import android.support.annotation.DrawableRes;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
-import com.liyu.sqlitetoexcel.ExcelToSqlite;
-import com.liyu.sqlitetoexcel.SqliteToExcel;
+import com.liyu.sqlitetoexcel.ExcelToSQLite;
+import com.liyu.sqlitetoexcel.SQLiteToExcel;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -38,57 +40,81 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onExport(View v) {
-        SqliteToExcel ste = new SqliteToExcel(this, "ste_db.db");
-        ste.startExportAllTables("test001.xls", new SqliteToExcel.ExportListener() {
-            @Override
-            public void onStart() {
-                tv.append(makeLog("\n" +
-                        "Export start--->"));
-            }
 
-            @Override
-            public void onCompleted(String filePath) {
-                tv.append(makeLog("\n" +
-                        "Export completed--->" + filePath));
-            }
+        String databasePath1 = this.getDatabasePath("ste_db.db").getAbsolutePath();
 
-            @Override
-            public void onError(Exception e) {
-                tv.append(makeLog("\n" +
-                        "Export error--->" + e.toString()));
+        String databasePath2 = Environment.getExternalStorageDirectory().getPath()
+                + File.separator + "citychina.db";
 
-            }
-        });
+        new SQLiteToExcel
+                .Builder(this)
+                .setDataBase(databasePath2)
+//                .setTables("user")
+//                .setPath(Environment.getExternalStorageDirectory().getPath())
+//                .setFileName("test.xls")
+//                .setEncryptKey("1234567")
+//                .setProtectKey("9876543")
+                .start(new SQLiteToExcel.ExportListener() {
+                    @Override
+                    public void onStart() {
+                        tv.append(makeLog("\n" +
+                                "Export importTables--->"));
+                    }
+
+                    @Override
+                    public void onCompleted(String filePath) {
+                        tv.append(makeLog("\n" +
+                                "Export completed--->" + filePath));
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        tv.append(makeLog("\n" +
+                                "Export error--->" + e.toString()));
+
+                    }
+                });
     }
 
     public void onImport(View v) {
-        ExcelToSqlite ets = new ExcelToSqlite(this, "user.db");
-        ets.startFromAsset("user2.xlsx", new ExcelToSqlite.ImportListener() {
-            @Override
-            public void onStart() {
-                tv.append(makeLog("\n" +
-                        "Import start--->"));
-            }
 
-            @Override
-            public void onCompleted(String dbName) {
-                tv.append(makeLog("\n" +
-                        "Import completed--->"));
-                showDbMsg(dbName);
-            }
+        final String databasePath1 = this.getDatabasePath("internal.db").getAbsolutePath();
 
-            @Override
-            public void onError(Exception e) {
-                tv.append(makeLog("\n" +
-                        "Import error--->" + e.toString()));
-            }
-        });
+        final String databasePath2 = Environment.getExternalStorageDirectory().getPath()
+                + File.separator + "external.db";
+
+        new ExcelToSQLite
+                .Builder(this)
+                .setDataBase(databasePath1)
+                .setAssetFileName("user.xls")
+//                .setFilePath(Environment.getExternalStorageDirectory().getPath()
+//                        + File.separator + "test.xls")
+                .start(new ExcelToSQLite.ImportListener() {
+                    @Override
+                    public void onStart() {
+                        tv.append(makeLog("\n" +
+                                "Import importTables--->"));
+                    }
+
+                    @Override
+                    public void onCompleted(boolean result) {
+                        tv.append(makeLog("\n" +
+                                "Import completed--->"));
+                        showDbMsg(databasePath1);
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        tv.append(makeLog("\n" +
+                                "Import error--->" + e.toString()));
+                    }
+                });
     }
 
     private void showDbMsg(String dbName) {
         SQLiteDatabase database;
         try {
-            database = SQLiteDatabase.openOrCreateDatabase(MainActivity.this.getDatabasePath(dbName).getAbsolutePath(), null);
+            database = SQLiteDatabase.openOrCreateDatabase(dbName, null);
             Cursor cursor = database.rawQuery("select name from sqlite_master where type='table' order by name", null);
             while (cursor.moveToNext()) {
                 tv.append("\nNew tables is : " + cursor.getString(0) + "  ");
