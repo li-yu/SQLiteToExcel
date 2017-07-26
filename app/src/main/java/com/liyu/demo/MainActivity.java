@@ -24,6 +24,8 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView tv;
 
+    private String outputFile;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,12 +50,12 @@ public class MainActivity extends AppCompatActivity {
 
         new SQLiteToExcel
                 .Builder(this)
-                .setDataBase(databasePath2)
+                .setDataBase(databasePath1)
 //                .setTables("user")
 //                .setPath(Environment.getExternalStorageDirectory().getPath())
 //                .setFileName("test.xls")
-//                .setEncryptKey("1234567")
-//                .setProtectKey("9876543")
+                .setEncryptKey("1234567")
+                .setProtectKey("9876543")
                 .start(new SQLiteToExcel.ExportListener() {
                     @Override
                     public void onStart() {
@@ -65,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onCompleted(String filePath) {
                         tv.append(makeLog("\n" +
                                 "Export completed--->" + filePath));
+                        outputFile = filePath;
                     }
 
                     @Override
@@ -85,10 +88,11 @@ public class MainActivity extends AppCompatActivity {
 
         new ExcelToSQLite
                 .Builder(this)
-                .setDataBase(databasePath1)
+//                .setDataBase(databasePath1)
                 .setAssetFileName("user.xls")
-//                .setFilePath(Environment.getExternalStorageDirectory().getPath()
-//                        + File.separator + "test.xls")
+//                .setFilePath(outputFile)
+                .setDecryptKey("1234567")
+                .setDateFormat("yyyy-MM-dd HH:mm:ss")
                 .start(new ExcelToSQLite.ImportListener() {
                     @Override
                     public void onStart() {
@@ -97,10 +101,10 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onCompleted(boolean result) {
+                    public void onCompleted(String result) {
                         tv.append(makeLog("\n" +
-                                "Import completed--->"));
-                        showDbMsg(databasePath1);
+                                "Import completed--->" + result));
+                        showDbMsg(result);
                     }
 
                     @Override

@@ -7,17 +7,24 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 
+import org.apache.poi.hssf.record.crypto.Biff8EncryptionKey;
+import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.math.BigInteger;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Excel to SQLite
@@ -29,15 +36,22 @@ public class ExcelToSQLite {
     private static Handler handler = new Handler(Looper.getMainLooper());
 
     private Context mContext;
+    private String dataBaseName;
     private SQLiteDatabase database;
     private String filePath;
     private String assetFileName;
+    private String decryptKey;
+    private String dateFormat;
+
+    private SimpleDateFormat sdf;
 
     public static class Builder {
         private Context context;
         private String dataBaseName;
         private String filePath;
         private String assetFileName;
+        private String decryptKey;
+        private String dateFormat;
 
         public Builder(Context context) {
             this.context = context.getApplicationContext();
@@ -47,7 +61,7 @@ public class ExcelToSQLite {
             if (TextUtils.isEmpty(dataBaseName)) {
                 throw new IllegalArgumentException("Database name must not be null.");
             }
-            return new ExcelToSQLite(context, dataBaseName, filePath, assetFileName);
+            return new ExcelToSQLite(context, dataBaseName, filePath, assetFileName, decryptKey, dateFormat);
         }
 
         public Builder setDataBase(String dataBaseName) {
@@ -55,15 +69,31 @@ public class ExcelToSQLite {
             return this;
         }
 
+        public Builder setDateFormat(String dateFormat) {
+            this.dateFormat = dateFormat;
+            return this;
+        }
+
         public Builder setFilePath(String path) {
             this.filePath = path;
             this.assetFileName = null;
+            if (TextUtils.isEmpty(this.dataBaseName)) {
+                this.dataBaseName = context.getDatabasePath(new File(path).getName() + ".db").getAbsolutePath();
+            }
+            return this;
+        }
+
+        public Builder setDecryptKey(String decryptKey) {
+            this.decryptKey = decryptKey;
             return this;
         }
 
         public Builder setAssetFileName(String name) {
             this.assetFileName = name;
             this.filePath = null;
+            if (TextUtils.isEmpty(this.dataBaseName)) {
+                this.dataBaseName = context.getDatabasePath(new File(name).getName() + ".db").getPath();
+            }
             return this;
         }
 
@@ -79,10 +109,16 @@ public class ExcelToSQLite {
 
     }
 
-    private ExcelToSQLite(Context mContext, String dataBaseName, String filePath, String assetFileName) {
-        this.mContext = mContext;
+    private ExcelToSQLite(Context context, String dataBaseName, String filePath, String assetFileName, String decryptKey, String dateFormat) {
+        this.mContext = context;
         this.filePath = filePath;
         this.assetFileName = assetFileName;
+        this.decryptKey = decryptKey;
+        this.dataBaseName = dataBaseName;
+        this.dateFormat = dateFormat;
+        if (!TextUtils.isEmpty(dateFormat)) {
+            sdf = new SimpleDateFormat(dateFormat);
+        }
 
         try {
             database = SQLiteDatabase.openOrCreateDatabase(dataBaseName, null);
@@ -137,7 +173,7 @@ public class ExcelToSQLite {
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
-                                listener.onCompleted(true);
+                                listener.onCompleted(dataBaseName);
                             }
                         });
                     }
@@ -168,6 +204,9 @@ public class ExcelToSQLite {
     private boolean importTables(InputStream stream, String fileName) throws Exception {
         Workbook workbook;
         if (fileName.toLowerCase().endsWith(".xls")) {
+            if (!TextUtils.isEmpty(decryptKey)) {
+                Biff8EncryptionKey.setCurrentUserPassword("1234567");
+            }
             workbook = new HSSFWorkbook(stream);
         } else {
             throw new UnsupportedOperationException("Unsupported file format!");
@@ -212,8 +251,17 @@ public class ExcelToSQLite {
                     continue;
                 }
                 if (row.getCell(n).getCellType() == Cell.CELL_TYPE_NUMERIC) {
-                    values.put(columns.get(n), row.getCell(n).getNumericCellValue());
-                } else {
+                    if (HSSFDateUtil.isCellDateFormatted(row.getCell(n))) {
+                        if (sdf == null) {
+                            values.put(columns.get(n), DateFormat.getDateTimeInstance().format(row.getCell(n).getDateCellValue()));
+                        } else {
+                            values.put(columns.get(n), sdf.format(row.getCell(n).getDateCellValue()));
+                        }
+                    } else {
+                        String value = getRealStringValueOfDouble(row.getCell(n).getNumericCellValue());
+                        values.put(columns.get(n), value);
+                    }
+                } else if (row.getCell(n).getCellType() == Cell.CELL_TYPE_STRING) {
                     values.put(columns.get(n), row.getCell(n).getStringCellValue());
                 }
             }
@@ -226,13 +274,36 @@ public class ExcelToSQLite {
         }
     }
 
+    private static String getRealStringValueOfDouble(Double d) {
+        String doubleStr = d.toString();
+        boolean b = doubleStr.contains("E");
+        int indexOfPoint = doubleStr.indexOf('.');
+        if (b) {
+            int indexOfE = doubleStr.indexOf('E');
+            BigInteger xs = new BigInteger(doubleStr.substring(indexOfPoint
+                    + BigInteger.ONE.intValue(), indexOfE));
+            int pow = Integer.valueOf(doubleStr.substring(indexOfE
+                    + BigInteger.ONE.intValue()));
+            int xsLen = xs.toByteArray().length;
+            int scale = xsLen - pow > 0 ? xsLen - pow : 0;
+            doubleStr = String.format("%." + scale + "f", d);
+        } else {
+            java.util.regex.Pattern p = Pattern.compile(".0$");
+            java.util.regex.Matcher m = p.matcher(doubleStr);
+            if (m.find()) {
+                doubleStr = doubleStr.replace(".0", "");
+            }
+        }
+        return doubleStr;
+    }
+
     /**
      * Callbacks for import events.
      */
     public interface ImportListener {
         void onStart();
 
-        void onCompleted(boolean result);
+        void onCompleted(String dataBaseName);
 
         void onError(Exception e);
     }

@@ -14,7 +14,7 @@ SQLiteToExcel 库整合了 [Apache POI](http://poi.apache.org/) 和一些基本�
 ## 如何使用
 #### 1. 添加 Gradle 依赖
 ``` Gradle
-compile 'com.liyu.tools:sqlitetoexcel:1.0.5'
+compile 'com.liyu.tools:sqlitetoexcel:1.0.6'
 ```
 
 #### 2. SQLite -> Excel 示例代码（具体示例可参考 [demo](https://github.com/li-yu/SQLiteToExcel/blob/master/app/src/main/java/com/liyu/demo/MainActivity.java) 工程）
@@ -34,9 +34,11 @@ new SQLiteToExcel
 ```java
 new ExcelToSQLite
                 .Builder(this)
-                .setDataBase(databasePath) //必须。
+                .setDataBase(databasePath) // 可选，如果不设置，默认为 “*.xls.db”，位于内部 database 目录下。
                 .setAssetFileName("user.xls") // 如果文件在 asset 目录。
                 .setFilePath("/storage/doc/user.xls") // 如果文件在其他目录。
+                .setDecryptKey("1234567") // 可选，如果需要解密文档
+                .setDateFormat("yyyy-MM-dd HH:mm:ss") // 可选，如果需要统一格式化日期单元格
                 .start(ImportListener); // 或者使用 .start() 同步方法。
 ```
 

@@ -14,7 +14,7 @@ From v1.0.5, **not support xlsx** format any more, because poi ooxml lib and oth
 ## How to use
 #### 1. Add Gradle dependencies
 ``` Gradle
-compile 'com.liyu.tools:sqlitetoexcel:1.0.5'
+compile 'com.liyu.tools:sqlitetoexcel:1.0.6'
 ```
 
 #### 2. SQLite -> Excel Sample code(Specific examples can be found in [demo](https://github.com/li-yu/SQLiteToExcel/blob/master/app/src/main/java/com/liyu/demo/MainActivity.java))
@@ -34,9 +34,11 @@ new SQLiteToExcel
 ```java
 new ExcelToSQLite
                 .Builder(this)
-                .setDataBase(databasePath) //Required.
+                .setDataBase(databasePath) // Optional, default is "*.xls.db" in internal database path.
                 .setAssetFileName("user.xls") // if it is a asset file.
                 .setFilePath("/storage/doc/user.xls") // if it is a normal file.
+                .setDecryptKey("1234567") // Optional, if need to decrypt the file.
+                .setDateFormat("yyyy-MM-dd HH:mm:ss") // Optional, if need to format date cell.
                 .start(ImportListener); // or .start() for synchronous method.
 ```
 
