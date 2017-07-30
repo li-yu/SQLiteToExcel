@@ -14,7 +14,7 @@ SQLiteToExcel 库整合了 [Apache POI](http://poi.apache.org/) 和一些基本�
 ## 如何使用
 #### 1. 添加 Gradle 依赖
 ``` Gradle
-compile 'com.liyu.tools:sqlitetoexcel:1.0.6'
+compile 'com.liyu.tools:sqlitetoexcel:1.0.7'
 ```
 
 #### 2. SQLite -> Excel 示例代码（具体示例可参考 [demo](https://github.com/li-yu/SQLiteToExcel/blob/master/app/src/main/java/com/liyu/demo/MainActivity.java) 工程）

@@ -14,7 +14,7 @@ From v1.0.5, **not support xlsx** format any more, because poi ooxml lib and oth
 ## How to use
 #### 1. Add Gradle dependencies
 ``` Gradle
-compile 'com.liyu.tools:sqlitetoexcel:1.0.6'
+compile 'com.liyu.tools:sqlitetoexcel:1.0.7'
 ```
 
 #### 2. SQLite -> Excel Sample code(Specific examples can be found in [demo](https://github.com/li-yu/SQLiteToExcel/blob/master/app/src/main/java/com/liyu/demo/MainActivity.java))

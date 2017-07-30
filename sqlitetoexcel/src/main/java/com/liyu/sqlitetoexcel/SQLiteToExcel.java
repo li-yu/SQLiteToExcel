@@ -243,7 +243,7 @@ public class SQLiteToExcel {
                     patriarch.createPicture(anchor, workbook.addPicture(cursor.getBlob(j), HSSFWorkbook.PICTURE_TYPE_JPEG));
                 } else {
                     String value = cursor.getString(j);
-                    if (value.length() >= 32767) {
+                    if (!TextUtils.isEmpty(value) && value.length() >= 32767) {
                         value = value.substring(0, 32766);
                     }
                     cellA.setCellValue(new HSSFRichTextString(value));
