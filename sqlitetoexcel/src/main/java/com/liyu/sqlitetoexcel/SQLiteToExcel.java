@@ -21,6 +21,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 /**
@@ -36,6 +37,8 @@ public class SQLiteToExcel {
     private String fileName;
     private String filePath;
     private List<String> tables;
+    private String sql;
+    private String sheetName;
 
     private SQLiteDatabase database;
     private Workbook workbook;
@@ -47,6 +50,8 @@ public class SQLiteToExcel {
         private String protectKey;
         private String encryptKey;
         private List<String> tables;
+        private String sql;
+        private String sheetName;
 
         public Builder(Context context) {
             this.filePath = context.getExternalFilesDir(null).getPath();
@@ -59,7 +64,7 @@ public class SQLiteToExcel {
             if (TextUtils.isEmpty(fileName)) {
                 throw new IllegalArgumentException("Output file name must not be null.");
             }
-            return new SQLiteToExcel(tables, protectKey, encryptKey, fileName, dataBaseName, filePath);
+            return new SQLiteToExcel(tables, protectKey, encryptKey, fileName, dataBaseName, filePath, sql, sheetName);
         }
 
         public Builder setDataBase(String dataBaseName) {
@@ -68,7 +73,17 @@ public class SQLiteToExcel {
             return this;
         }
 
+        /**
+         * @deprecated Use {@link #setOutputFileName(String fileName)} instead.
+         * @param fileName
+         * @return Builder
+         */
+        @Deprecated
         public Builder setFileName(String fileName) {
+            return setOutputFileName(fileName);
+        }
+
+        public Builder setOutputFileName(String fileName) {
             this.fileName = fileName;
             return this;
         }
@@ -88,9 +103,30 @@ public class SQLiteToExcel {
             return this;
         }
 
+
+        /**
+         * @deprecated Use {@link #setOutputPath(String path)} instead.
+         * @param path
+         * @return Builder
+         */
+        @Deprecated
         public Builder setPath(String path) {
+            return setOutputPath(path);
+        }
+
+        public Builder setOutputPath(String path) {
             this.filePath = path;
             return this;
+        }
+
+        public Builder setSQL(@NonNull String sheetName, @NonNull String sql) {
+            this.sql = sql;
+            this.sheetName = sheetName;
+            return this;
+        }
+
+        public Builder setSQL(@NonNull String sql) {
+            return setSQL("Sheet1", sql);
         }
 
         public String start() {
@@ -105,16 +141,16 @@ public class SQLiteToExcel {
     }
 
     /**
-     * importTables task
+     * import Tables task
      *
      * @return output file path
      */
     public String start() {
-        if (tables == null || tables.size() == 0) {
-            tables = getAllTables(database);
-        }
         try {
-            return exportTables(tables, fileName);
+            if (tables == null || tables.size() == 0) {
+                tables = getTablesName(database);
+            }
+            return exportTables(getTablesName(database), fileName);
         } catch (Exception e) {
             if (database != null && database.isOpen()) {
                 database.close();
@@ -126,12 +162,9 @@ public class SQLiteToExcel {
     /**
      * importTables task with a listener
      *
-     * @param listener
+     * @param listener callback
      */
     public void start(final ExportListener listener) {
-        if (tables == null || tables.size() == 0) {
-            tables = getAllTables(database);
-        }
         if (listener != null) {
             listener.onStart();
         }
@@ -140,7 +173,10 @@ public class SQLiteToExcel {
             @Override
             public void run() {
                 try {
-                    final String filePath = exportTables(tables, fileName);
+                    if (tables == null || tables.size() == 0) {
+                        tables = getTablesName(database);
+                    }
+                    final String filePath = exportTables(getTablesName(database), fileName);
                     if (listener != null) {
                         handler.post(new Runnable() {
                             @Override
@@ -165,12 +201,14 @@ public class SQLiteToExcel {
         }).start();
     }
 
-    private SQLiteToExcel(List<String> tables, String protectKey, String encryptKey, String fileName, String dataBaseName, String filePath) {
+    private SQLiteToExcel(List<String> tables, String protectKey, String encryptKey, String fileName,
+                          String dataBaseName, String filePath, String sql, String sheetName) {
         this.protectKey = protectKey;
         this.encryptKey = encryptKey;
         this.fileName = fileName;
         this.filePath = filePath;
-        this.tables = tables;
+        this.sql = sql;
+        this.sheetName = sheetName;
 
         try {
             database = SQLiteDatabase.openOrCreateDatabase(dataBaseName, null);
@@ -191,11 +229,20 @@ public class SQLiteToExcel {
         if (fileName.toLowerCase().endsWith(".xls")) {
             workbook = new HSSFWorkbook();
         } else {
-            throw new IllegalArgumentException("file name is null or unsupported file format!");
+            throw new IllegalArgumentException("File name is null or unsupported file format!");
         }
-        for (int i = 0; i < tables.size(); i++) {
-            Sheet sheet = workbook.createSheet(tables.get(i));
-            fillSheet(tables.get(i), sheet);
+        if (TextUtils.isEmpty(sql)) {
+            for (int i = 0; i < tables.size(); i++) {
+                Sheet sheet = workbook.createSheet(tables.get(i));
+                String sqlAll = "select * from " + tables.get(i);
+                fillSheet(sqlAll, sheet);
+                if (!TextUtils.isEmpty(protectKey)) {
+                    sheet.protectSheet(protectKey);
+                }
+            }
+        } else {
+            Sheet sheet = workbook.createSheet(sheetName);
+            fillSheet(sql, sheet);
             if (!TextUtils.isEmpty(protectKey)) {
                 sheet.protectSheet(protectKey);
             }
@@ -219,23 +266,23 @@ public class SQLiteToExcel {
     /**
      * Query the database ,then fill in to the sheet
      *
-     * @param table database table name
+     * @param sql   query sql
      * @param sheet target sheet
      */
-    private void fillSheet(String table, Sheet sheet) {
-        Row headerRow = sheet.createRow(0);
-        ArrayList<String> columns = getTableColumns(database, table);
-        for (int i = 0; i < columns.size(); i++) {
-            Cell cellA = headerRow.createCell(i);
-            cellA.setCellValue(new HSSFRichTextString("" + columns.get(i)));
-        }
+    private void fillSheet(String sql, Sheet sheet) {
         Drawing patriarch = sheet.createDrawingPatriarch();
-        Cursor cursor = database.rawQuery("select * from " + table, null);
+        Cursor cursor = database.rawQuery(sql, null);
         cursor.moveToFirst();
+        final int columnsCount = cursor.getColumnCount();
+        Row headerRow = sheet.createRow(0);
+        for (int i = 0; i < columnsCount; i++) {
+            Cell cellA = headerRow.createCell(i);
+            cellA.setCellValue(new HSSFRichTextString("" + cursor.getColumnNames()[i]));
+        }
         int n = 1;
         while (!cursor.isAfterLast()) {
             Row rowA = sheet.createRow(n);
-            for (int j = 0; j < columns.size(); j++) {
+            for (int j = 0; j < columnsCount; j++) {
                 Cell cellA = rowA.createCell(j);
                 if (cursor.getType(j) == Cursor.FIELD_TYPE_BLOB) {
                     ClientAnchor anchor = new HSSFClientAnchor(0, 0, 0, 0, (short) j, n, (short) (j + 1), n + 1);
@@ -260,30 +307,14 @@ public class SQLiteToExcel {
      *
      * @return tables
      */
-    private ArrayList<String> getAllTables(SQLiteDatabase database) {
-        ArrayList<String> tables = new ArrayList<>();
+    private List<String> getTablesName(SQLiteDatabase database) {
+        List<String> tables = new ArrayList<>();
         Cursor cursor = database.rawQuery("select name from sqlite_master where type='table' order by name", null);
         while (cursor.moveToNext()) {
             tables.add(cursor.getString(0));
         }
         cursor.close();
         return tables;
-    }
-
-    /**
-     * get all columns from a table
-     *
-     * @param table database table
-     * @return columns
-     */
-    private ArrayList<String> getTableColumns(SQLiteDatabase database, String table) {
-        ArrayList<String> columns = new ArrayList<>();
-        Cursor cursor = database.rawQuery("PRAGMA table_info(" + table + ")", null);
-        while (cursor.moveToNext()) {
-            columns.add(cursor.getString(1));
-        }
-        cursor.close();
-        return columns;
     }
 
     /**

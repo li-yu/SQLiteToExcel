@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        tv = (TextView) findViewById(R.id.tv);
+        tv = findViewById(R.id.tv);
 
         User user = new User();
         user.setName("呵呵小鱼");
@@ -54,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
 //                .setTables("user")
 //                .setPath(Environment.getExternalStorageDirectory().getPath())
 //                .setFileName("test.xls")
+                .setSQL("select name as '名字', price as '价格' from user where name like '%小鱼%'")
                 .setEncryptKey("1234567")
                 .setProtectKey("9876543")
                 .start(new SQLiteToExcel.ExportListener() {

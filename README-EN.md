@@ -8,29 +8,40 @@ The SQLiteToExcel library integrates [Apache POI](http://poi.apache.org/) and so
 
 From v1.0.5, **not support xlsx** format any more, because poi ooxml lib and other dependencies are so big( > 10 MB), and there are some strange problems on Android.
 
+From v1.0.8, support custom SQL query.
+
 ## Version history
 [Release Notes](https://github.com/li-yu/SQLiteToExcel/releases)
 
 ## How to use
 #### 1. Add Gradle dependencies
 ``` Gradle
-compile 'com.liyu.tools:sqlitetoexcel:1.0.7'
+compile 'com.liyu.tools:sqlitetoexcel:1.0.8'
 ```
 
-#### 2. SQLite -> Excel Sample code(Specific examples can be found in [demo](https://github.com/li-yu/SQLiteToExcel/blob/master/app/src/main/java/com/liyu/demo/MainActivity.java))
+#### 2. SQLite -> Excel  [demo](https://github.com/li-yu/SQLiteToExcel/blob/master/app/src/main/java/com/liyu/demo/MainActivity.java)
 ```java
 new SQLiteToExcel
                 .Builder(this)
                 .setDataBase(databasePath) //Required. Tips: internal database path can be got by context.getDatabasePath("internal.db").getPath()
                 .setTables(table1, table2) //Optional, if null, all tables will be export. 
-                .setPath(outoutPath) //Optional, if null, default output path is app ExternalFilesDir. 
-                .setFileName("test.xls") //Optional, if null, default output file name is xxx.db.xls
+                .setOutputPath(outoutPath) //Optional, if null, default output path is app ExternalFilesDir. 
+                .setOutputFileName("test.xls") //Optional, if null, default output file name is xxx.db.xls
                 .setEncryptKey("1234567") //Optional, if you want to encrypt the output file.
                 .setProtectKey("9876543") //Optional, if you want to set the sheet read only.
                 .start(ExportListener); // or .start() for synchronous method.
 ```
 
-#### 3. Excel -> SQLite Sample code(Specific examples can be found in [demo](https://github.com/li-yu/SQLiteToExcel/blob/master/app/src/main/java/com/liyu/demo/MainActivity.java))
+Custom SQL：
+```java
+new SQLiteToExcel
+                .Builder(this)
+                .setDataBase(databasePath)
+                .setSQL("select name as USER_NAME, price as USER_PRICE from user where name like '%FRANK%'")
+				.start(ExportListener); 
+```
+
+#### 3. Excel -> SQLite [demo](https://github.com/li-yu/SQLiteToExcel/blob/master/app/src/main/java/com/liyu/demo/MainActivity.java)
 ```java
 new ExcelToSQLite
                 .Builder(this)
