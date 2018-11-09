@@ -38,7 +38,7 @@ new SQLiteToExcel
                 .Builder(this)
                 .setDataBase(databasePath)
                 .setSQL("select name as USER_NAME, price as USER_PRICE from user where name like '%FRANK%'")
-				.start(ExportListener); 
+                .start(ExportListener);
 ```
 
 #### 3. Excel -> SQLite [demo](https://github.com/li-yu/SQLiteToExcel/blob/master/app/src/main/java/com/liyu/demo/MainActivity.java)
