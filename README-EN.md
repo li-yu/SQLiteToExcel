@@ -16,7 +16,7 @@ From v1.0.8, support custom SQL query.
 ## How to use
 #### 1. Add Gradle dependencies
 ``` Gradle
-compile 'com.liyu.tools:sqlitetoexcel:1.0.8'
+compile 'com.liyu.tools:sqlitetoexcel:1.0.9'
 ```
 
 #### 2. SQLite -> Excel  [demo](https://github.com/li-yu/SQLiteToExcel/blob/master/app/src/main/java/com/liyu/demo/MainActivity.java)

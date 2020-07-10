@@ -1,1 +1,3 @@
+include ':app-kt'
+include ':sqlitetoexcel-kt'
 include ':app', ':sqlitetoexcel'

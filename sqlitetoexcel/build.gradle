@@ -8,8 +8,8 @@ android {
     defaultConfig {
         minSdkVersion 15
         targetSdkVersion 27
-        versionCode 8
-        versionName "1.0.8"
+        versionCode 9
+        versionName "1.0.9"
     }
     buildTypes {
         release {
@@ -28,7 +28,7 @@ dependencies {
 def siteUrl = 'https://github.com/li-yu/SQLiteToExcel'
 def gitUrl = 'https://github.com/li-yu/SQLiteToExcel.git'
 
-version = "1.0.8"
+version = "1.0.9"
 group = "com.liyu.tools"
 
 Properties properties = new Properties()
@@ -45,9 +45,9 @@ bintray {
         licenses = ["Apache-2.0"]
         publish = true
         version {
-            name = '1.0.8'
+            name = '1.0.9'
             released  = new Date()
-            vcsTag = 'v1.0.8'
+            vcsTag = 'v1.0.9'
             attributes = ['gradle-plugin': 'com.use.less:com.use.less.gradle:gradle-useless-plugin']
             desc = 'A simple lib for Android to export SQLite to Excel.'
         }

@@ -16,7 +16,7 @@ v1.0.8 版本开始支持自定义 SQL 查询导出了。
 ## 如何使用
 #### 1. 添加 Gradle 依赖
 ``` Gradle
-implementation 'com.liyu.tools:sqlitetoexcel:1.0.8'
+implementation 'com.liyu.tools:sqlitetoexcel:1.0.9'
 ```
 
 #### 2. SQLite -> Excel [demo](https://github.com/li-yu/SQLiteToExcel/blob/master/app/src/main/java/com/liyu/demo/MainActivity.java)

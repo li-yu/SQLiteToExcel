@@ -74,9 +74,9 @@ public class SQLiteToExcel {
         }
 
         /**
-         * @deprecated Use {@link #setOutputFileName(String fileName)} instead.
          * @param fileName
          * @return Builder
+         * @deprecated Use {@link #setOutputFileName(String fileName)} instead.
          */
         @Deprecated
         public Builder setFileName(String fileName) {
@@ -103,11 +103,10 @@ public class SQLiteToExcel {
             return this;
         }
 
-
         /**
-         * @deprecated Use {@link #setOutputPath(String path)} instead.
          * @param path
          * @return Builder
+         * @deprecated Use {@link #setOutputPath(String path)} instead.
          */
         @Deprecated
         public Builder setPath(String path) {
@@ -150,7 +149,7 @@ public class SQLiteToExcel {
             if (tables == null || tables.size() == 0) {
                 tables = getTablesName(database);
             }
-            return exportTables(getTablesName(database), fileName);
+            return exportTables(tables, fileName);
         } catch (Exception e) {
             if (database != null && database.isOpen()) {
                 database.close();
@@ -176,7 +175,7 @@ public class SQLiteToExcel {
                     if (tables == null || tables.size() == 0) {
                         tables = getTablesName(database);
                     }
-                    final String filePath = exportTables(getTablesName(database), fileName);
+                    final String filePath = exportTables(tables, fileName);
                     if (listener != null) {
                         handler.post(new Runnable() {
                             @Override
