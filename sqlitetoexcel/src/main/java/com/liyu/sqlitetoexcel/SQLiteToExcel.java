@@ -52,24 +52,27 @@ public class SQLiteToExcel {
         private List<String> tables;
         private String sql;
         private String sheetName;
+        private Context context;
 
         public Builder(Context context) {
-            this.filePath = context.getExternalFilesDir(null).getPath();
+            this.context = context;
         }
 
         public SQLiteToExcel build() {
             if (TextUtils.isEmpty(dataBaseName)) {
                 throw new IllegalArgumentException("Database name must not be null.");
             }
+            if (TextUtils.isEmpty(filePath)) {
+                this.filePath = context.getExternalFilesDir(null).getPath();
+            }
             if (TextUtils.isEmpty(fileName)) {
-                throw new IllegalArgumentException("Output file name must not be null.");
+                this.fileName = new File(dataBaseName).getName() + ".xls";
             }
             return new SQLiteToExcel(tables, protectKey, encryptKey, fileName, dataBaseName, filePath, sql, sheetName);
         }
 
         public Builder setDataBase(String dataBaseName) {
             this.dataBaseName = dataBaseName;
-            this.fileName = new File(dataBaseName).getName() + ".xls";
             return this;
         }
 
@@ -128,7 +131,7 @@ public class SQLiteToExcel {
             return setSQL("Sheet1", sql);
         }
 
-        public String start() {
+        public String start() throws Exception {
             final SQLiteToExcel sqliteToExcel = build();
             return sqliteToExcel.start();
         }
@@ -144,7 +147,7 @@ public class SQLiteToExcel {
      *
      * @return output file path
      */
-    public String start() {
+    public String start() throws Exception {
         try {
             if (tables == null || tables.size() == 0) {
                 tables = getTablesName(database);
@@ -154,7 +157,7 @@ public class SQLiteToExcel {
             if (database != null && database.isOpen()) {
                 database.close();
             }
-            return null;
+            throw e;
         }
     }
 
@@ -175,12 +178,12 @@ public class SQLiteToExcel {
                     if (tables == null || tables.size() == 0) {
                         tables = getTablesName(database);
                     }
-                    final String filePath = exportTables(tables, fileName);
+                    final String finalFilePath = exportTables(tables, fileName);
                     if (listener != null) {
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
-                                listener.onCompleted(filePath);
+                                listener.onCompleted(finalFilePath);
                             }
                         });
                     }
@@ -208,7 +211,7 @@ public class SQLiteToExcel {
         this.filePath = filePath;
         this.sql = sql;
         this.sheetName = sheetName;
-
+        this.tables = tables;
         try {
             database = SQLiteDatabase.openOrCreateDatabase(dataBaseName, null);
         } catch (Exception e) {

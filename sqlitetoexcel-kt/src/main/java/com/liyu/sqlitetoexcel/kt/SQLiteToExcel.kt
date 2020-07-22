@@ -3,7 +3,7 @@ package com.liyu.sqlitetoexcel.kt
 import android.content.Context
 import java.lang.Exception
 
-class SQLiteToExcel(val context: Context) {
+class SQLiteToExcel(private val context: Context) {
 
     var databasePath: String? = null
     var tables: Array<String> = arrayOf("")
@@ -16,30 +16,35 @@ class SQLiteToExcel(val context: Context) {
     private var onError: ((Throwable) -> Unit)? = null
     private var onStart: (() -> Unit)? = null
 
-    fun start(block: SQLiteToExcel.() -> Unit) {
+    fun start(block: SQLiteToExcel.() -> Unit): String? {
         block()
-        com.liyu.sqlitetoexcel.SQLiteToExcel.Builder(context)
+        val sqLiteToExcel = com.liyu.sqlitetoexcel.SQLiteToExcel.Builder(context)
                 .setDataBase(databasePath)
                 .setTables(*tables)
                 .setOutputPath(outputPath)
                 .setOutputFileName(outputFileName)
                 .setEncryptKey(encryptKey)
                 .setProtectKey(protectKey)
-                .start(object : com.liyu.sqlitetoexcel.SQLiteToExcel.ExportListener {
-                    override fun onStart() {
-                        onStartInner()
-                    }
+                .build()
+        if (onCompleted == null && onError == null && onStart == null) {
+            return sqLiteToExcel.start()
+        } else {
+            sqLiteToExcel.start(object : com.liyu.sqlitetoexcel.SQLiteToExcel.ExportListener {
+                override fun onStart() {
+                    onStartInner()
+                }
 
-                    override fun onCompleted(filePath: String) {
-                        onCompletedInner(filePath)
-                    }
+                override fun onCompleted(filePath: String) {
+                    onCompletedInner(filePath)
+                }
 
-                    override fun onError(e: Exception) {
-                        onErrorInner(e)
-                    }
-                })
+                override fun onError(e: Exception) {
+                    onErrorInner(e)
+                }
+            })
+            return null
+        }
     }
-
 
     fun onCompleted(block: (String) -> Unit) {
         onCompleted = block
