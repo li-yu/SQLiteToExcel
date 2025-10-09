@@ -65,5 +65,5 @@ new ExcelToSQLite
 * ~~The database files must be located under ```/data/data/package name/databases/` ``, and are usually located in this directory.~~
 
 ## About me
-* Email: [me@liyuyu.cn](mailto:me@liyuyu.cn)
+* Email: [liyu2140@gmail.com](mailto:liyu2140@gmail.com)
 * Weibo: [@呵呵小小鱼](http://weibo.com/u/1241167880)
