@@ -63,5 +63,5 @@ new ExcelToSQLite
 * ~~数据库文件须位于```/data/data/包名/databases/```下，一般都是位于这个目录下。~~
 
 ## 联系我
-* Email: [me@liyuyu.cn](mailto:me@liyuyu.cn)
+* Email: [liyu2140@gmail.com](mailto:liyu2140@gmail.com)
 * Weibo: [@呵呵小小鱼](http://weibo.com/u/1241167880)
